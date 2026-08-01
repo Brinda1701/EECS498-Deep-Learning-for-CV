@@ -1,0 +1,10 @@
+# Ignore Python virtual environment
+torch_env/
+
+# Ignore Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore Jupyter notebook checkpoints
+.ipynb_checkpoints/
