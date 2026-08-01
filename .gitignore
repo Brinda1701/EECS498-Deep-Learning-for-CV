@@ -8,3 +8,7 @@ __pycache__/
 
 # Ignore Jupyter notebook checkpoints
 .ipynb_checkpoints/
+
+# Ignore assignment dataset files
+Assignment1/A1/cifar-10-batches-py/
+Assignment1/A1/cifar-10-python.tar.gz
