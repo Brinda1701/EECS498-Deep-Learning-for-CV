@@ -382,7 +382,7 @@ def knn_cross_validate(
 
 
 def knn_get_best_k(k_to_accuracies: Dict[int, List]):
-    """
+    """ 
     Select the best value for k, from the cross-validation result from
     knn_cross_validate. If there are multiple k's available, then you SHOULD
     choose the smallest k among all possible answer.
@@ -395,7 +395,7 @@ def knn_get_best_k(k_to_accuracies: Dict[int, List]):
     Returns:
         best_k: best (and smallest if there is a conflict) k value based on
             the k_to_accuracies info.
-    """
+    """ 
     best_k = 0
     ##########################################################################
     # TODO: Use the results of cross-validation stored in k_to_accuracies to #

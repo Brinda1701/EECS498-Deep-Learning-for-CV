@@ -27,7 +27,7 @@ def create_sample_tensor() -> Tensor:
     #                     TODO: Implement this function                      #
     ##########################################################################
     # Replace "pass" statement with your code
-    x = torch.zeros((3,2))
+    x = torch.zeros(3,2)
     x[0, 1] = 10
     x[1, 0] = 100
     ###########################################################################
@@ -118,7 +118,7 @@ def create_tensor_of_pi(M: int, N: int) -> Tensor:
     #         TODO: Implement this function. It should take one line.        #
     ##########################################################################
     # Replace "pass" statement with your code
-    x = torch.ones((M, N), 3.14)
+    x = torch.full((M, N), 3.14)
     ##########################################################################
     #                            END OF YOUR CODE                            #
     ##########################################################################
