@@ -104,8 +104,8 @@ def preprocess_cifar10(
     """
     X_train, y_train, X_test, y_test = cifar10(x_dtype=dtype)
 
-    # Move data to the GPU
-    if cuda:
+    # Move data to the GPU if available
+    if cuda and torch.cuda.is_available():
         X_train = X_train.cuda()
         y_train = y_train.cuda()
         X_test = X_test.cuda()
