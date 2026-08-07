@@ -63,6 +63,10 @@ def get_toy_data(
     H = hidden_size
     C = num_classes
 
+    if device == "cuda" and not torch.cuda.is_available():
+        device = "cpu"
+
+
     # We set the random seed for repeatable experiments.
     reset_seed(0)
 
