@@ -109,12 +109,15 @@ def preprocess_cifar10(
     """
     X_train, y_train, X_test, y_test = cifar10(x_dtype=dtype)
 
-    # Move data to the GPU
+    # Move data to the GPU if CUDA is available
     if cuda:
-        X_train = X_train.cuda()
-        y_train = y_train.cuda()
-        X_test = X_test.cuda()
-        y_test = y_test.cuda()
+        if torch.cuda.is_available():
+            X_train = X_train.cuda()
+            y_train = y_train.cuda()
+            X_test = X_test.cuda()
+            y_test = y_test.cuda()
+        else:
+            print("Warning: CUDA is not available. Using CPU instead.")
 
     # 0. Visualize some examples from the dataset.
     if show_examples:
