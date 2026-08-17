@@ -11,8 +11,11 @@ __pycache__/
 
 # Ignore assignment dataset files & archives
 cifar-10-batches-py/
+VOCdevkit/
+*.tar
 *.tar.gz
 *.zip
+voc*.json
 .tmp.driveupload/
 .DS_Store
 

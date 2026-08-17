@@ -84,7 +84,20 @@ class DetectorBackboneWithFPN(nn.Module):
         self.fpn_params = nn.ModuleDict()
 
         # Replace "pass" statement with your code
-        pass
+        in_c3 = dummy_out_shapes[0][1][1]
+        in_c4 = dummy_out_shapes[1][1][1]
+        in_c5 = dummy_out_shapes[2][1][1]
+
+        self.fpn_params["c3_lateral"] = nn.Conv2d(in_c3, out_channels, kernel_size=1)
+        self.fpn_params["c4_lateral"] = nn.Conv2d(in_c4, out_channels, kernel_size=1)
+        self.fpn_params["c5_lateral"] = nn.Conv2d(in_c5, out_channels, kernel_size=1)
+
+        self.fpn_params["p3_output"] = nn.Conv2d(out_channels, out_channels, 
+                                                 kernel_size=3, padding=1)
+        self.fpn_params["p4_output"] = nn.Conv2d(out_channels, out_channels,
+                                                 kernel_size=3, padding=1)
+        self.fpn_params["p5_output"] = nn.Conv2d(out_channels, out_channels,
+                                                 kernel_size=3, padding=1)
         ######################################################################
         #                            END OF YOUR CODE                        #
         ######################################################################
@@ -111,7 +124,20 @@ class DetectorBackboneWithFPN(nn.Module):
         ######################################################################
 
         # Replace "pass" statement with your code
-        pass
+        c3 = backbone_feats["c3"]
+        c4 = backbone_feats["c4"]
+        c5 = backbone_feats["c5"]
+
+        p5_lat = self.fpn_params["c5_lateral"](c5)
+        p4_lat = self.fpn_params["c4_lateral"](c4)
+        p3_lat = self.fpn_params["c3_lateral"](c3)
+
+        p4_merged = F.interpolate(p5_lat, scale_factor=2, mode="nearest") + p4_lat
+        p3_merged = F.interpolate(p4_merged, scale_factor=2, mode="nearest") + p3_lat
+
+        fpn_feats["p5"] = self.fpn_params["p5_output"](p5_lat)
+        fpn_feats["p4"] = self.fpn_params["p4_output"](p4_merged)
+        fpn_feats["p3"] = self.fpn_params["p3_output"](p3_merged)
         ######################################################################
         #                            END OF YOUR CODE                        #
         ######################################################################
@@ -157,7 +183,15 @@ def get_fpn_location_coords(
         # TODO: Implement logic to get location co-ordinates below.          #
         ######################################################################
         # Replace "pass" statement with your code
-        pass
+        B, C, H, W = feat_shape
+        y_indices = torch.arange(H, dtype=dtype, device=device)
+        x_indices = torch.arange(W, dtype=dtype, device=device)
+        grid_y, grid_x = torch.meshgrid(y_indices, x_indices, indexing="ij")
+
+        xc = level_stride * (grid_x + 0.5)
+        yc = level_stride * (grid_y + 0.5)
+    
+        location_coords[level_name] = torch.stack([xc, yc], dim=-1).reshape(-1, 2)
         ######################################################################
         #                             END OF YOUR CODE                       #
         ######################################################################
@@ -196,7 +230,36 @@ def nms(boxes: torch.Tensor, scores: torch.Tensor, iou_threshold: float = 0.5):
     # github.com/pytorch/vision/blob/main/torchvision/csrc/ops/cpu/nms_kernel.cpp
     #############################################################################
     # Replace "pass" statement with your code
-    pass
+    order = scores.sort(descending=True).indices
+    keep = []
+
+    while order.numel() > 0:
+        i = order[0]
+        keep.append(i)
+        if order.numel() == 1:
+            break
+        rest = order[1: ]
+
+        best_box = boxes[i]
+        rest_boxes = boxes[rest]
+
+        xx1 = torch.max(best_box[0], rest_boxes[:, 0])
+        yy1 = torch.max(best_box[1], rest_boxes[:, 1])
+        xx2 = torch.min(best_box[2], rest_boxes[:, 2])
+        yy2 = torch.min(best_box[3], rest_boxes[:, 3])
+
+        inter_w = (xx2 - xx1).clamp(min=0)
+        inter_h = (yy2 - yy1).clamp(min=0)
+        inter = inter_w * inter_h
+
+        area_best = (best_box[2] - best_box[0]) * (best_box[3] - best_box[1])
+        area_rest = ((rest_boxes[:, 2] - rest_boxes[:, 0]) * (rest_boxes[:, 3] - rest_boxes[:, 1]))
+        union = area_best + area_rest - inter
+        iou = inter / union
+        order = rest[iou <= iou_threshold]
+    if len(keep) == 0:
+        return torch.empty((0,), dtype=torch.long, device=boxes.device)
+    keep = torch.stack(keep)
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
