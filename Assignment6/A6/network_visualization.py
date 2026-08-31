@@ -41,7 +41,12 @@ def compute_saliency_maps(X, y, model):
     # Hint: X.grad.data stores the gradients                                     #
     ##############################################################################
     # Replace "pass" statement with your code
-    pass
+    scores = model(X)
+    correct_scores = scores.gather(1, y.view(-1, 1)).squeeze(1)
+
+    loss = correct_scores.sum()
+    loss.backward()
+    saliency = X.grad.abs().max(dim=1).values
     ##############################################################################
     #               END OF YOUR CODE                                             #
     ##############################################################################
@@ -84,7 +89,23 @@ def make_adversarial_attack(X, target_y, model, max_iter=100, verbose=True):
     # You can print your progress over iterations to check your algorithm.       #
     ##############################################################################
     # Replace "pass" statement with your code
-    pass
+    for i in range(max_iter):
+        scores = model(X_adv)
+        if scores.data.max(1)[1][0].item() == target_y:
+            break
+
+        loss = scores[0, target_y]
+        loss.backward()
+        
+        g = X_adv.grad
+        dX = learning_rate * g / g.norm()
+        X_adv.data += dX
+
+        if verbose == True:
+            print('Iteration %d: target score %.3f, max score %.3f' % (i+1, scores[0, target_y].item(), scores.data.max().item()))
+
+        
+        X_adv.grad.zero_()
     ##############################################################################
     #                             END OF YOUR CODE                               #
     ##############################################################################
@@ -119,7 +140,14 @@ def class_visualization_step(img, target_y, model, **kwargs):
     # after each step.                                                     #
     ########################################################################
     # Replace "pass" statement with your code
-    pass
+    scores = model(img)
+    loss = scores[0, target_y]
+    loss.backward()
+
+    grad = img.grad
+
+    img.data += learning_rate * (grad - 2 * l2_reg * img)
+    img.grad.zero_()
     ########################################################################
     #                             END OF YOUR CODE                         #
     ########################################################################

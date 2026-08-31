@@ -12,7 +12,10 @@ import torch
 import torch.optim as optim
 import torchvision.datasets as dset
 import torchvision.transforms as T
-from scipy.ndimage.filters import gaussian_filter1d
+try:
+    from scipy.ndimage.filters import gaussian_filter1d
+except ImportError:
+    from scipy.ndimage import gaussian_filter1d
 from torch import nn
 from torch.utils.data import DataLoader, sampler
 

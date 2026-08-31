@@ -23,3 +23,6 @@ voc*.json
 *.pt
 *.pkl
 
+# A6 MNIST download (large, regenerable)
+Assignment6/A6/MNIST_data/
+
